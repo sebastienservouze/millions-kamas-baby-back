@@ -12,6 +12,8 @@ export interface Item extends Document {
     type?: string;
     picture?: number;
     pa_cost?: number;
+    last_seen_price?: number;
+    count?: number;
     ingredients?: [];
     effects?: [];
 }
@@ -26,6 +28,8 @@ const itemSchema: Schema = new Schema({
     type: { type: String },
     picture: { type: Number },
     pa_cost: { type: Number },
+    last_seen_price: { type: Number },
+    count: { type: Number },
     ingredients: [ this ],
     effects: [ effectSchema ],
 });
