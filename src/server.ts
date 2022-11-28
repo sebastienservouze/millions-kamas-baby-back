@@ -8,7 +8,9 @@ import { ItemsController } from './controllers/items.controller'
 import cors from 'cors'
 
 const http = require('http');
+const https = require('https');
 const request = require('request');
+const fs = require('fs');
 
 // var cert = fs.readFileSync('/etc/letsencrypt/live/nerisma.fr/fullchain.pem');
 // var key = fs.readFileSync('/etc/letsencrypt/live/nerisma.fr/privkey.pem');
@@ -77,7 +79,7 @@ setTimeout(() => {
     });
 }, 3000)
 
-//scrap();
+// scrap();
 
 async function scrap() {
     await Items.deleteMany({});
@@ -88,10 +90,12 @@ async function scrap() {
             let jsonItems = body.data;
             jsonItems.forEach(async (item: Item) => {
                 await Items.create(item);
+                await downloadImage('https://retro.dofusbook.net/static/items/' + item.picture + '_0.png', './../millions-kamas-baby/src/assets/imgs/' + item.picture + '.png')
                 if (item.ingredients) {
                     item.ingredients.forEach(async (ingredient: Item) => {
-                        if (!(await Items.find({ id: ingredient.id})).length) {
+                        if (!(await Items.find({ id: ingredient.id })).length) {
                             await Items.create(ingredient);
+                            await downloadImage('https://retro.dofusbook.net/static/items/' + ingredient.picture + '_0.png', './../millions-kamas-baby/src/assets/imgs/' + ingredient.picture + '.png')
                         }
                     })
                 }
@@ -99,5 +103,21 @@ async function scrap() {
         })
     }
 
-    // Cac
+    // TODO Cac
+}
+
+function downloadImage(url, filepath) {
+    return new Promise((resolve, reject) => {
+        https.get(url, (res) => {
+            if (res.statusCode === 200) {
+                res.pipe(fs.createWriteStream(filepath))
+                    .on('error', reject)
+                    .once('close', () => resolve(filepath));
+            } else {
+                // Consume response data to free up memory
+                res.resume();
+                reject(new Error(`Request Failed With a Status Code: ${res.statusCode}`));
+            }
+        });
+    });
 }
