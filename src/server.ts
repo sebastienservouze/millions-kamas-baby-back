@@ -77,7 +77,7 @@ setTimeout(() => {
         if (!err) console.log("Count", count);
         else console.log('Erreur', err);
     });
-}, 3000)
+}, 6000)
 
 // scrap();
 
@@ -88,15 +88,23 @@ async function scrap() {
     for (let page = 1; page <= 23; page++) {
         request('https://retro.dofusbook.net/items/retro/search/equipment?context=equipment&display=mosaic&sort=desc&view=effects&page=' + page, { json: true }, (err: any, res: any, body: any) => {
             let jsonItems = body.data;
+
             jsonItems.forEach(async (item: Item) => {
-                await Items.create(item);
-                await downloadImage('https://retro.dofusbook.net/static/items/' + item.picture + '_0.png', './../millions-kamas-baby/src/assets/imgs/' + item.picture + '.png')
+                try {
+                    await Items.create(item);
+                } catch (ex) {
+                    console.error('Page ' + page + ': ' + ex.message);
+                }
+                // await downloadImage('https://retro.dofusbook.net/static/items/' + item.picture + '_0.png', './../millions-kamas-baby/src/assets/imgs/' + item.picture + '.png')
                 if (item.ingredients) {
                     item.ingredients.forEach(async (ingredient: Item) => {
-                        if (!(await Items.find({ id: ingredient.id })).length) {
+                        try {
                             await Items.create(ingredient);
-                            await downloadImage('https://retro.dofusbook.net/static/items/' + ingredient.picture + '_0.png', './../millions-kamas-baby/src/assets/imgs/' + ingredient.picture + '.png')
+                        } catch (ex) {
+                            console.error('Page ' + page + ': ' + ex.message);
                         }
+                        // await downloadImage('https://retro.dofusbook.net/static/items/' + ingredient.picture + '_0.png', './../millions-kamas-baby/src/assets/imgs/' + ingredient.picture + '.png')
+
                     })
                 }
             });

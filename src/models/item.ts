@@ -4,6 +4,7 @@ import { effectSchema } from "./effect";
 
 export interface Item extends Document {
     id: number;
+    item_id: number;
     name: string;
     lastPrice?: number,
     level?: number,
@@ -21,6 +22,7 @@ export interface Item extends Document {
 const itemSchema: Schema = new Schema({
     id: { type: Number, required: true },
     name: { type: String, required: true },
+    item_id: { type: Number },
     lastPrice: { type: Number },
     level: { type: Number },
     category_name: { type: String },
